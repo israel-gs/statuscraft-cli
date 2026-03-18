@@ -6,6 +6,7 @@ import { readFile, access, stat } from 'node:fs/promises';
 import items, { ANSI_COLORS } from './items.js';
 import { generatePreview, writeFiles, generateScript } from './generator.js';
 import { backupFlow, restoreFlow, manageBackupsFlow, listBackups } from './backups.js';
+import { multiselectWithPreview, selectWithPreview } from './custom-prompts.js';
 
 const DEFAULT_SCRIPT_PATH = `${process.env.HOME}/.claude/statusline.sh`;
 const DEFAULT_SELECTED = ['model', 'context_pct', 'git_branch'];
@@ -45,7 +46,7 @@ async function createFlow() {
 
   // ── Step 1: Select items ──────────────────────────────────────────────
   const selectedIds = handleCancel(
-    await p.multiselect({
+    await multiselectWithPreview({
       message: 'Select the items for your statusline:',
       options: items.map((item) => ({
         value: item.id,
@@ -54,6 +55,21 @@ async function createFlow() {
       })),
       initialValues: DEFAULT_SELECTED,
       required: true,
+      getConfigForPreview: (values) => {
+        const previewItems = values
+          .map((id) => items.find((i) => i.id === id))
+          .filter(Boolean)
+          .map((item) => ({
+            item,
+            cfg: {
+              color: item.defaultColor,
+              label: '',
+              autoColor: item.supportsAutoColor ? true : false,
+              mode: item.defaultMode || null,
+            },
+          }));
+        return { items: previewItems, separator: '│' };
+      },
     })
   );
 
@@ -67,63 +83,84 @@ async function createFlow() {
   // ── Step 2: Configure each item ───────────────────────────────────────
   p.log.step(chalk.bold('Configure each item:'));
 
-  const itemConfigs = [];
+  const itemConfigs = selectedItems.map((item) => ({
+    item,
+    cfg: {
+      color: item.defaultColor,
+      label: '',
+      autoColor: item.supportsAutoColor ? true : false,
+      mode: item.defaultMode || null,
+    },
+  }));
 
-  for (const item of selectedItems) {
-    p.log.info(chalk.cyan(`${item.emoji} ${item.name}`));
+  const showLivePreview = (msg = 'Live Preview', customConfigs = itemConfigs, sep = '│') => {
+    p.note(generatePreview({ items: customConfigs, separator: sep }), msg);
+  };
 
-    const color = handleCancel(
-      await p.select({
+  for (let i = 0; i < selectedItems.length; i++) {
+    const item = selectedItems[i];
+    const cfg = itemConfigs[i].cfg;
+
+    cfg.color = handleCancel(
+      await selectWithPreview({
         message: `Color for ${item.name}:`,
         options: ANSI_COLORS.map((c) => ({
           value: c.value,
           label: c.label,
         })),
-        initialValue: item.defaultColor,
+        initialValue: cfg.color,
+        getConfigForPreview: (colorValue) => {
+          // Temporarily apply color
+          const tempCfg = { ...cfg, color: colorValue };
+          const idx = itemConfigs.findIndex((ic) => ic.item.id === item.id);
+          const previewConfigs = [...itemConfigs];
+          previewConfigs[idx] = { item, cfg: tempCfg };
+          return { items: previewConfigs, separator: '│' };
+        },
       })
     );
 
-    const label = handleCancel(
+    cfg.label = handleCancel(
       await p.text({
         message: `Custom label/prefix — enter for none (e.g. "Model:"):`,
-        defaultValue: '',
+        defaultValue: cfg.label,
       })
     );
 
-    let autoColor = false;
     if (item.supportsAutoColor) {
-      autoColor = handleCancel(
+      cfg.autoColor = handleCancel(
         await p.confirm({
           message: `Enable auto-color? (green < 40%, yellow < 70%, red >= 70%)`,
-          initialValue: true,
+          initialValue: cfg.autoColor,
         })
       );
     }
 
-    let mode = null;
     if (item.modes) {
-      mode = handleCancel(
-        await p.select({
+      cfg.mode = handleCancel(
+        await selectWithPreview({
           message: `Display mode for ${item.name}:`,
           options: item.modes.map((m) => ({
             value: m.value,
             label: m.label,
             hint: m.hint,
           })),
-          initialValue: item.defaultMode,
+          initialValue: cfg.mode,
+          getConfigForPreview: (modeValue) => {
+            const tempCfg = { ...cfg, mode: modeValue };
+            const idx = itemConfigs.findIndex((ic) => ic.item.id === item.id);
+            const previewConfigs = [...itemConfigs];
+            previewConfigs[idx] = { item, cfg: tempCfg };
+            return { items: previewConfigs, separator: '│' };
+          },
         })
       );
     }
-
-    itemConfigs.push({
-      item,
-      cfg: { color, label: label || '', autoColor, mode },
-    });
   }
 
   // ── Step 3: Order items ───────────────────────────────────────────────
   const orderedIds = handleCancel(
-    await p.multiselect({
+    await multiselectWithPreview({
       message:
         'Set the display order (items appear in the order you select them):',
       options: itemConfigs.map(({ item }) => ({
@@ -132,6 +169,12 @@ async function createFlow() {
       })),
       initialValues: itemConfigs.map(({ item }) => item.id),
       required: true,
+      getConfigForPreview: (values) => {
+        const previewConfigs = values
+          .map((id) => itemConfigs.find(({ item }) => item.id === id))
+          .filter(Boolean);
+        return { items: previewConfigs, separator: '│' };
+      },
     })
   );
 
@@ -141,7 +184,7 @@ async function createFlow() {
 
   // ── Step 4: Separator ─────────────────────────────────────────────────
   const separator = handleCancel(
-    await p.select({
+    await selectWithPreview({
       message: 'Choose a separator between items:',
       options: [
         { value: '│', label: '│  Pipe (thin)' },
@@ -152,6 +195,9 @@ async function createFlow() {
         { value: '::', label: ':: Double colon' },
         { value: ' ', label: '   Double space' },
       ],
+      getConfigForPreview: (sepValue) => {
+        return { items: orderedConfigs, separator: sepValue };
+      },
     })
   );
 

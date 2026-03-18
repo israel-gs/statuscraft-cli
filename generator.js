@@ -47,28 +47,31 @@ printf "%s" "$result"
 `;
 }
 
-/**
- * Generates an ASCII preview of the statusline with example values.
- * @param {object} config - { items: [{item, cfg}], separator }
- * @returns {string} preview string
- */
 export function generatePreview(config) {
   const { items: selectedItems, separator } = config;
 
   const parts = selectedItems.map(({ item, cfg }) => {
     const label = cfg.label ? `${cfg.label} ` : '';
+    let content = '';
 
     // Use mode-specific example if available
     if (item.exampleValues && cfg.mode) {
-      return `${label}${item.exampleValues[cfg.mode]}`;
+      content = `${label}${item.exampleValues[cfg.mode]}`;
     }
-
     // Special case: git_branch default prefix
-    if (item.id === 'git_branch' && !cfg.label) {
-      return `⎇ ${item.exampleValue}`;
+    else if (item.id === 'git_branch' && !cfg.label) {
+      content = `⎇ ${item.exampleValue}`;
+    } else {
+      content = `${label}${item.exampleValue}`;
     }
 
-    return `${label}${item.exampleValue}`;
+    // Apply color if available
+    if (cfg.color) {
+      let applyColor = cfg.color;
+      return `\x1b[01;${applyColor}m${content}\x1b[0m`;
+    }
+
+    return content;
   });
 
   return parts.join(` ${separator} `);
