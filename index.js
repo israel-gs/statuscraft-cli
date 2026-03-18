@@ -203,10 +203,11 @@ async function createFlow() {
   const scriptPath = handleCancel(
     await p.text({
       message: 'Path for the generated bash script:',
-      defaultValue: DEFAULT_SCRIPT_PATH,
+      initialValue: DEFAULT_SCRIPT_PATH,
       validate(value) {
-        if (!value) return 'Path is required';
-        if (!value.startsWith('/') && !value.startsWith('~'))
+        const v = value || DEFAULT_SCRIPT_PATH;
+        if (!v) return 'Path is required';
+        if (!v.startsWith('/') && !v.startsWith('~'))
           return 'Must be an absolute path';
       },
     })
