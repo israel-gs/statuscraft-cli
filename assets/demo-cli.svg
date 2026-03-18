@@ -51,12 +51,28 @@
   <text x="36" y="415" class="t dim">◻  🕐 Time</text>
   <text x="36" y="435" class="t dim">◻  🔑 Session ID</text>
 
-  <text x="20" y="465" class="t white">│</text>
-  <text x="20" y="485" class="t white">│    <tspan class="dim">Live Preview ────────────────────────────╮</tspan></text>
-  <text x="20" y="505" class="t white">│    <tspan class="cyan">claude-sonnet-4-5</tspan> │ <tspan class="yellow">42%</tspan> │ <tspan class="cyan">⎇ main</tspan> │ <tspan class="green">$0.023</tspan>  <tspan class="dim">│</tspan></text>
-  <text x="20" y="525" class="t white">│    <tspan class="dim">─────────────────────────────────────────╯</tspan></text>
+  <!-- Live Preview box - terminal style using SVG lines for precision -->
+  <!-- Top border line -->
+  <line x1="44" y1="463" x2="590" y2="463" stroke="#334155" stroke-width="1"/>
+  <!-- Right vertical border -->
+  <line x1="590" y1="463" x2="590" y2="510" stroke="#334155" stroke-width="1"/>
+  <!-- Bottom border line -->
+  <line x1="44" y1="510" x2="590" y2="510" stroke="#334155" stroke-width="1"/>
+  <!-- "Live Preview" label overlapping top line -->
+  <rect x="44" y="455" width="90" height="14" fill="#0f172a"/>
+  <text x="49" y="466" class="t dim" font-size="11">Live Preview</text>
+  <!-- Content -->
+  <text x="49" y="491" class="t">
+    <tspan class="cyan">claude-sonnet-4-5</tspan>
+    <tspan class="dim"> │ </tspan>
+    <tspan class="yellow">42%</tspan>
+    <tspan class="dim"> │ </tspan>
+    <tspan class="cyan">⎇ main</tspan>
+    <tspan class="dim"> │ </tspan>
+    <tspan class="cyan">[████░░░░░░]</tspan>
+  </text>
 
-  <text x="20" y="555" class="t white">│</text>
-  <text x="20" y="575" class="t gray">▪  Press space to toggle, enter to confirm</text>
-  <text x="20" y="595" class="t white">│</text>
+  <text x="20" y="540" class="t white">│</text>
+  <text x="20" y="560" class="t gray">▪  Press space to toggle, enter to confirm</text>
+  <text x="20" y="580" class="t white">│</text>
 </svg>
