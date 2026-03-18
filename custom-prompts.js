@@ -1,4 +1,4 @@
-import { MultiSelectPrompt, SelectPrompt } from '@clack/core';
+import { MultiSelectPrompt, SelectPrompt, Prompt } from '@clack/core';
 import chalk from 'chalk';
 import { stripVTControlCharacters } from 'node:util';
 import { generatePreview } from './generator.js';
@@ -175,4 +175,139 @@ export async function selectWithPreview(opts) {
       return out;
     }
   }).prompt();
+}
+
+/**
+ * Reorder prompt — raw readline-based.
+ * ↑/↓    — navigate cursor
+ * Space  — grab/release item (when grabbed, ↑/↓ also moves the item)
+ * Enter  — confirm
+ * Ctrl+C / Esc — cancel
+ */
+export async function reorderPrompt(opts) {
+  let order = [...opts.initialOrder];
+  let cursor = 0;
+  let grabbed = false;
+  let linesWritten = 0;
+
+  const bar = chalk.cyan(S_BAR);
+  const grayBar = chalk.gray(S_BAR);
+
+  function render(state = 'active') {
+    if (linesWritten > 0) {
+      process.stdout.write(`\x1B[${linesWritten}A\x1B[0J`);
+    }
+
+    const lines = [];
+    lines.push(grayBar);
+
+    if (state === 'submit') {
+      const labels = order.map(id => {
+        const opt = opts.options.find(o => o.value === id);
+        return opt ? (opt.label || opt.value) : id;
+      });
+      lines.push(`${chalk.green(S_STEP_SUBMIT)}  ${opts.message}`);
+      lines.push(`${grayBar}  ${chalk.dim(labels.join(' › '))}`);
+      process.stdout.write(lines.join('\n') + '\n');
+      linesWritten = lines.length;
+      return;
+    }
+
+    if (state === 'cancel') {
+      lines.push(`${chalk.red(S_STEP_CANCEL)}  ${opts.message}`);
+      lines.push(`${grayBar}  ${chalk.strikethrough(chalk.dim('cancelled'))}`);
+      process.stdout.write(lines.join('\n') + '\n');
+      linesWritten = lines.length;
+      return;
+    }
+
+    lines.push(`${chalk.cyan(S_STEP_ACTIVE)}  ${opts.message}`);
+    if (grabbed) {
+      lines.push(`${bar}  ${chalk.yellow('↑↓ move item  ·  Space release  ·  Enter confirm')}`);
+    } else {
+      lines.push(`${bar}  ${chalk.dim('↑↓ navigate  ·  Space grab & move  ·  Enter confirm')}`);
+    }
+
+    for (let i = 0; i < order.length; i++) {
+      const id = order[i];
+      const opt = opts.options.find(o => o.value === id);
+      const label = opt ? (opt.label || opt.value) : id;
+      const num = chalk.dim(`${i + 1}.`);
+      if (i === cursor) {
+        if (grabbed) {
+          lines.push(`${bar}  ${num} ${chalk.yellow('⬡')} ${chalk.bold.yellow(label)}`);
+        } else {
+          lines.push(`${bar}  ${num} ${chalk.cyan('▶')} ${chalk.bold(label)}`);
+        }
+      } else {
+        lines.push(`${bar}  ${num}   ${chalk.dim(label)}`);
+      }
+    }
+
+    // Live preview
+    const configForPreview = opts.getConfigForPreview(order);
+    if (configForPreview && configForPreview.items.length > 0) {
+      const previewStr = generatePreview(configForPreview);
+      const visualWidth = stripVTControlCharacters(previewStr).length;
+      const title = 'Live Preview';
+      const boxWidth = Math.max(visualWidth + 2, title.length + 4);
+      lines.push(bar);
+      lines.push(`${bar}  ${chalk.dim(title)} ${chalk.gray('─'.repeat(boxWidth - title.length - 1) + '╮')}`);
+      lines.push(`${bar}  ${previewStr}${chalk.gray(' '.repeat(boxWidth - visualWidth) + '│')}`);
+      lines.push(`${bar}  ${chalk.gray('─'.repeat(boxWidth) + '╯')}`);
+    }
+
+    lines.push(chalk.cyan('└'));
+    process.stdout.write(lines.join('\n') + '\n');
+    linesWritten = lines.length;
+  }
+
+  return new Promise((resolve) => {
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    render();
+
+    const onData = (chunk) => {
+      const key = chunk;
+
+      if (key === '\x1B[A') {
+        // ↑ — navigate up; if grabbed, also move item
+        if (grabbed && cursor > 0) {
+          [order[cursor - 1], order[cursor]] = [order[cursor], order[cursor - 1]];
+        }
+        cursor = Math.max(0, cursor - 1);
+        render();
+      } else if (key === '\x1B[B') {
+        // ↓ — navigate down; if grabbed, also move item
+        if (grabbed && cursor < order.length - 1) {
+          [order[cursor], order[cursor + 1]] = [order[cursor + 1], order[cursor]];
+        }
+        cursor = Math.min(order.length - 1, cursor + 1);
+        render();
+      } else if (key === ' ') {
+        // Space — toggle grab
+        grabbed = !grabbed;
+        render();
+      } else if (key === '\r' || key === '\n') {
+        grabbed = false;
+        cleanup();
+        render('submit');
+        resolve(order);
+      } else if (key === '\x03' || key === '\x1B') {
+        cleanup();
+        render('cancel');
+        resolve(Symbol('cancel'));
+      }
+    };
+
+    const cleanup = () => {
+      process.stdin.removeListener('data', onData);
+      if (process.stdin.isTTY) process.stdin.setRawMode(false);
+      process.stdin.pause();
+    };
+
+    process.stdin.on('data', onData);
+  });
 }

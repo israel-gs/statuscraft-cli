@@ -6,7 +6,7 @@ import { readFile, access, stat } from 'node:fs/promises';
 import items, { ANSI_COLORS } from './items.js';
 import { generatePreview, writeFiles, generateScript } from './generator.js';
 import { backupFlow, restoreFlow, manageBackupsFlow, listBackups } from './backups.js';
-import { multiselectWithPreview, selectWithPreview } from './custom-prompts.js';
+import { multiselectWithPreview, selectWithPreview, reorderPrompt } from './custom-prompts.js';
 
 const DEFAULT_SCRIPT_PATH = `${process.env.HOME}/.claude/statusline.sh`;
 const DEFAULT_SELECTED = ['model', 'context_pct', 'git_branch'];
@@ -160,17 +160,15 @@ async function createFlow() {
 
   // ── Step 3: Order items ───────────────────────────────────────────────
   const orderedIds = handleCancel(
-    await multiselectWithPreview({
-      message:
-        'Set the display order (items appear in the order you select them):',
+    await reorderPrompt({
+      message: 'Reorder your statusline items:',
       options: itemConfigs.map(({ item }) => ({
         value: item.id,
         label: `${item.emoji} ${item.name}`,
       })),
-      initialValues: itemConfigs.map(({ item }) => item.id),
-      required: true,
-      getConfigForPreview: (values) => {
-        const previewConfigs = values
+      initialOrder: itemConfigs.map(({ item }) => item.id),
+      getConfigForPreview: (order) => {
+        const previewConfigs = order
           .map((id) => itemConfigs.find(({ item }) => item.id === id))
           .filter(Boolean);
         return { items: previewConfigs, separator: '│' };
