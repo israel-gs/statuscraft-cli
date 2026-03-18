@@ -52,9 +52,9 @@
   <text x="36" y="435" class="t dim">◻  🔑 Session ID</text>
 
   <text x="20" y="465" class="t white">│</text>
-  <text x="20" y="485" class="t white">│  <tspan class="dim">Live Preview ────────────────────────────╮</tspan></text>
-  <text x="20" y="505" class="t white">│  <tspan class="cyan">claude-sonnet-4-5</tspan> │ <tspan class="yellow">42%</tspan> │ <tspan class="cyan">⎇ main</tspan> │ <tspan class="green">$0.023</tspan>  <tspan class="dim">│</tspan></text>
-  <text x="20" y="525" class="t white">│  <tspan class="dim">─────────────────────────────────────────╯</tspan></text>
+  <text x="20" y="485" class="t white">│    <tspan class="dim">Live Preview ────────────────────────────╮</tspan></text>
+  <text x="20" y="505" class="t white">│    <tspan class="cyan">claude-sonnet-4-5</tspan> │ <tspan class="yellow">42%</tspan> │ <tspan class="cyan">⎇ main</tspan> │ <tspan class="green">$0.023</tspan>  <tspan class="dim">│</tspan></text>
+  <text x="20" y="525" class="t white">│    <tspan class="dim">─────────────────────────────────────────╯</tspan></text>
 
   <text x="20" y="555" class="t white">│</text>
   <text x="20" y="575" class="t gray">▪  Press space to toggle, enter to confirm</text>
