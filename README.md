@@ -75,11 +75,11 @@ statuscraft
 The CLI walks you through 6 steps:
 
 1. **Choose an action** — create, backup, restore, or list backups
-2. **Select widgets** — pick the items you want in your statusline
-3. **Configure each widget** — color, label, display mode, auto-color
-4. **Set display order** — arrange items left to right
-5. **Pick a separator** — `│` `•` `›` `|` `—` `::` or double space
-6. **Preview & save** — see your statusline before writing files
+2. **Select widgets** — pick items with a live preview that updates as you toggle each one
+3. **Configure each widget** — color, label, display mode, auto-color — preview updates as you navigate options
+4. **Set display order** — use `↑`/`↓` to navigate, `Space` to grab & drag an item, preview updates live
+5. **Pick a separator** — `│` `•` `›` `|` `—` `::` or double space — preview updates as you choose
+6. **Preview & save** — confirm the final statusline before writing files
 
 The tool generates `~/.claude/statusline.sh` and updates `~/.claude/settings.json` automatically. Restart Claude Code to see the changes.
 
