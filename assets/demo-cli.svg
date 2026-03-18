@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="520" viewBox="0 0 700 520">
+  <style>
+    .t { font-family: SF Mono, Menlo, Monaco, Consolas, monospace; font-size: 13px; }
+    .dim { fill: #64748b; }
+    .cyan { fill: #22d3ee; }
+    .green { fill: #4ade80; }
+    .yellow { fill: #facc15; }
+    .white { fill: #e2e8f0; }
+    .magenta { fill: #c084fc; }
+    .gray { fill: #94a3b8; }
+    .blue { fill: #60a5fa; }
+    .bar { fill: #334155; }
+  </style>
+  <!-- Window chrome -->
+  <rect width="700" height="520" rx="10" fill="#0f172a"/>
+  <rect width="700" height="36" rx="10" fill="#1e293b"/>
+  <rect y="26" width="700" height="10" fill="#1e293b"/>
+  <circle cx="20" cy="18" r="6" fill="#ef4444"/>
+  <circle cx="40" cy="18" r="6" fill="#eab308"/>
+  <circle cx="60" cy="18" r="6" fill="#22c55e"/>
+  <text x="350" y="22" text-anchor="middle" class="t dim" font-size="12">statuscraft</text>
+
+  <!-- Content -->
+  <text x="20" y="65" class="t cyan">┌  statuscraft</text>
+  <text x="20" y="85" class="t white">│</text>
+
+  <text x="20" y="105" class="t magenta">◆</text>
+  <text x="36" y="105" class="t white">  What would you like to do?</text>
+  <text x="36" y="125" class="t cyan">●  Create new statusline</text>
+  <text x="280" y="125" class="t dim">configure from scratch</text>
+  <text x="36" y="145" class="t dim">○  Backup current statusline</text>
+  <text x="36" y="165" class="t dim">○  Restore from backup</text>
+  <text x="36" y="185" class="t dim">○  List backups</text>
+
+  <text x="20" y="215" class="t white">│</text>
+
+  <text x="20" y="235" class="t magenta">◆</text>
+  <text x="36" y="235" class="t white">  Select the items for your statusline:</text>
+  <text x="36" y="255" class="t cyan">◼  🤖 Model Name</text>
+  <text x="270" y="255" class="t dim">Current Claude model display name</text>
+  <text x="36" y="275" class="t cyan">◼  📊 Context %</text>
+  <text x="270" y="275" class="t dim">Context window usage percentage</text>
+  <text x="36" y="295" class="t dim">◻  📶 Context Bar</text>
+  <text x="270" y="295" class="t dim">Visual progress bar</text>
+  <text x="36" y="315" class="t dim">◻  🔢 Tokens</text>
+  <text x="36" y="335" class="t cyan">◼  💰 Cost</text>
+  <text x="36" y="355" class="t cyan">◼  🌿 Git Branch</text>
+  <text x="270" y="355" class="t dim">Current git branch with ⎇ icon</text>
+  <text x="36" y="375" class="t dim">◻  📝 Git Status</text>
+  <text x="36" y="395" class="t dim">◻  📁 Directory</text>
+  <text x="36" y="415" class="t dim">◻  🕐 Time</text>
+  <text x="36" y="435" class="t dim">◻  🔑 Session ID</text>
+
+  <text x="20" y="465" class="t white">│</text>
+  <text x="20" y="485" class="t gray">▪  Press space to toggle, enter to confirm</text>
+  <text x="20" y="505" class="t white">│</text>
+</svg>

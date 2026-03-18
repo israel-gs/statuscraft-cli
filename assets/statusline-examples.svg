@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="260" viewBox="0 0 700 260">
+  <style>
+    .t { font-family: SF Mono, Menlo, Monaco, Consolas, monospace; font-size: 13px; }
+    .dim { fill: #64748b; }
+    .cyan { fill: #22d3ee; }
+    .green { fill: #4ade80; }
+    .yellow { fill: #facc15; }
+    .white { fill: #e2e8f0; }
+    .magenta { fill: #c084fc; }
+    .gray { fill: #94a3b8; }
+    .blue { fill: #60a5fa; }
+    .red { fill: #f87171; }
+    .label { font-size: 11px; fill: #475569; }
+  </style>
+  <!-- Window chrome -->
+  <rect width="700" height="260" rx="10" fill="#0f172a"/>
+  <rect width="700" height="36" rx="10" fill="#1e293b"/>
+  <rect y="26" width="700" height="10" fill="#1e293b"/>
+  <circle cx="20" cy="18" r="6" fill="#ef4444"/>
+  <circle cx="40" cy="18" r="6" fill="#eab308"/>
+  <circle cx="60" cy="18" r="6" fill="#22c55e"/>
+  <text x="350" y="22" text-anchor="middle" class="t dim" font-size="12">Statusline Examples</text>
+
+  <!-- Example 1: Minimal -->
+  <text x="30" y="65" class="label">Minimal</text>
+  <rect x="30" y="72" width="640" height="30" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="45" y="92" class="t">
+    <tspan class="cyan">claude-sonnet-4-5</tspan>
+    <tspan class="dim"> │ </tspan>
+    <tspan class="green">42%</tspan>
+    <tspan class="dim"> │ </tspan>
+    <tspan class="cyan">⎇ main</tspan>
+  </text>
+
+  <!-- Example 2: Full -->
+  <text x="30" y="125" class="label">Full dashboard</text>
+  <rect x="30" y="132" width="640" height="30" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="45" y="152" class="t">
+    <tspan class="cyan">claude-sonnet-4-5</tspan>
+    <tspan class="dim"> • </tspan>
+    <tspan class="yellow">[████░░░░░░]</tspan>
+    <tspan class="dim"> • </tspan>
+    <tspan class="magenta">85k</tspan>
+    <tspan class="dim"> • </tspan>
+    <tspan class="green">$0.023</tspan>
+    <tspan class="dim"> • </tspan>
+    <tspan class="cyan">⎇ feat/auth</tspan>
+    <tspan class="dim"> • </tspan>
+    <tspan class="gray">14:30</tspan>
+  </text>
+
+  <!-- Example 3: Custom labels -->
+  <text x="30" y="185" class="label">With custom labels</text>
+  <rect x="30" y="192" width="640" height="30" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="45" y="212" class="t">
+    <tspan class="blue">Model: claude-sonnet-4-5</tspan>
+    <tspan class="dim"> › </tspan>
+    <tspan class="red">Ctx: 72%</tspan>
+    <tspan class="dim"> › </tspan>
+    <tspan class="yellow">S:2 M:1 ?:0</tspan>
+    <tspan class="dim"> › </tspan>
+    <tspan class="green">Cost: $0.45</tspan>
+  </text>
+
+  <text x="350" y="248" text-anchor="middle" class="t dim" font-size="11">Colors, items, labels, and separators are all configurable</text>
+</svg>

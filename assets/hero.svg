@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" rx="12" fill="url(#bg)"/>
+  <rect x="0" y="186" width="800" height="3" rx="1" fill="url(#accent)" opacity="0.7"/>
+  <text x="400" y="85" text-anchor="middle" font-family="SF Mono,Menlo,Monaco,monospace" font-size="48" font-weight="bold" fill="#e2e8f0">⚡ statuscraft</text>
+  <text x="400" y="125" text-anchor="middle" font-family="SF Mono,Menlo,Monaco,monospace" font-size="18" fill="#94a3b8">Craft your perfect Claude Code statusline</text>
+  <text x="400" y="160" text-anchor="middle" font-family="SF Mono,Menlo,Monaco,monospace" font-size="14" fill="#64748b">Interactive CLI  •  10 widgets  •  12 colors  •  auto-color  •  backups</text>
+</svg>
