@@ -1,5 +1,7 @@
-import { readFile, writeFile, mkdir, chmod, access } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, chmod, access, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
+
+const CONFIG_PATH = `${process.env.HOME}/.claude/statuscraft-config.json`;
 
 /**
  * Generates the bash script content from the user's configuration.
@@ -121,5 +123,33 @@ export async function writeFiles(config) {
   await mkdir(dirname(settingsPath), { recursive: true });
   await writeFile(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
 
+  // Save config for edit mode
+  const configData = {
+    items: config.items.map(({ item, cfg }) => ({
+      id: item.id,
+      color: cfg.color,
+      label: cfg.label || '',
+      autoColor: cfg.autoColor || false,
+      mode: cfg.mode || null,
+    })),
+    separator: config.separator,
+    scriptPath: config.scriptPath,
+  };
+  await writeFile(CONFIG_PATH, JSON.stringify(configData, null, 2) + '\n', 'utf-8');
+
   return { scriptPath, settingsPath, settingsExisted, hadStatusLine };
+}
+
+/**
+ * Loads the saved configuration for edit mode.
+ * @returns {object|null} saved config or null if not found
+ */
+export async function loadSavedConfig() {
+  try {
+    await stat(CONFIG_PATH);
+    const raw = await readFile(CONFIG_PATH, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }

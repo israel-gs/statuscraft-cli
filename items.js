@@ -263,6 +263,161 @@ if [ -n "$_sid" ]; then
 fi`;
     },
   },
+  // ── New widgets ─────────────────────────────────────────────────────
+  {
+    id: 'session_duration',
+    name: 'Session Duration',
+    description: 'Elapsed time since session start',
+    emoji: '⏱️',
+    defaultColor: '90',
+    varName: 'duration_out',
+    supportsAutoColor: false,
+    modes: null,
+    exampleValue: '12m 34s',
+    generateBash(cfg) {
+      return `_start_file="/tmp/claude-session-start-$$"
+if [ ! -f "$_start_file" ]; then
+  # Find the most recent session start file or create one
+  _latest=$(ls -t /tmp/claude-session-start-* 2>/dev/null | head -1)
+  if [ -n "$_latest" ]; then
+    _start_file="$_latest"
+  fi
+fi
+if [ -f "$_start_file" ]; then
+  _start_ts=$(cat "$_start_file")
+  _now=$(date +%s)
+  _elapsed=$(( _now - _start_ts ))
+  _hours=$(( _elapsed / 3600 ))
+  _mins=$(( (_elapsed % 3600) / 60 ))
+  _secs=$(( _elapsed % 60 ))
+  if [ "$_hours" -gt 0 ]; then
+    _dur="\${_hours}h \${_mins}m"
+  elif [ "$_mins" -gt 0 ]; then
+    _dur="\${_mins}m \${_secs}s"
+  else
+    _dur="\${_secs}s"
+  fi
+  duration_out=${c(`${lbl(cfg)}$_dur`, cfg.color)}
+fi`;
+    },
+  },
+  {
+    id: 'git_ahead_behind',
+    name: 'Git Ahead/Behind',
+    description: 'Commits ahead/behind remote (↑2 ↓1)',
+    emoji: '🔄',
+    defaultColor: '36',
+    varName: 'ahead_behind_out',
+    supportsAutoColor: false,
+    modes: null,
+    exampleValue: '↑2 ↓1',
+    generateBash(cfg) {
+      return `if cd "$cwd" 2>/dev/null && git rev-parse --is-inside-work-tree &>/dev/null; then
+  _upstream=$(cd "$cwd" && git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null)
+  if [ -n "$_upstream" ]; then
+    _ahead=$(cd "$cwd" && git rev-list --count '@{upstream}..HEAD' 2>/dev/null)
+    _behind=$(cd "$cwd" && git rev-list --count 'HEAD..@{upstream}' 2>/dev/null)
+    _ahead=\${_ahead:-0}
+    _behind=\${_behind:-0}
+    if [ "$_ahead" -ne 0 ] || [ "$_behind" -ne 0 ]; then
+      ahead_behind_out=${c(`${lbl(cfg)}↑$_ahead ↓$_behind`, cfg.color)}
+    fi
+  fi
+fi`;
+    },
+  },
+  {
+    id: 'git_stash',
+    name: 'Git Stash Count',
+    description: 'Number of stashed changes',
+    emoji: '📦',
+    defaultColor: '33',
+    varName: 'stash_out',
+    supportsAutoColor: false,
+    modes: null,
+    exampleValue: '3 stash',
+    generateBash(cfg) {
+      return `if cd "$cwd" 2>/dev/null && git rev-parse --is-inside-work-tree &>/dev/null; then
+  _stash_count=$(cd "$cwd" && git stash list 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$_stash_count" -gt 0 ] 2>/dev/null; then
+    stash_out=${c(`${lbl(cfg)}$_stash_count stash`, cfg.color)}
+  fi
+fi`;
+    },
+  },
+  {
+    id: 'disk_usage',
+    name: 'Disk Usage',
+    description: 'Available disk space',
+    emoji: '💾',
+    defaultColor: '34',
+    varName: 'disk_out',
+    supportsAutoColor: false,
+    modes: [
+      { value: 'available', label: 'Available space', hint: '48Gi free' },
+      { value: 'used_pct', label: 'Used percentage', hint: '72% used' },
+    ],
+    defaultMode: 'available',
+    exampleValues: { available: '48Gi free', used_pct: '72% used' },
+    exampleValue: '48Gi free',
+    generateBash(cfg) {
+      const mode = cfg.mode || 'available';
+      if (mode === 'used_pct') {
+        return `_disk_pct=$(df -h / 2>/dev/null | awk 'NR==2{print $5}')
+if [ -n "$_disk_pct" ]; then
+  disk_out=${c(`${lbl(cfg)}$_disk_pct used`, cfg.color)}
+fi`;
+      }
+      return `_disk_avail=$(df -h / 2>/dev/null | awk 'NR==2{print $4}')
+if [ -n "$_disk_avail" ]; then
+  disk_out=${c(`${lbl(cfg)}$\{_disk_avail} free`, cfg.color)}
+fi`;
+    },
+  },
+  {
+    id: 'runtime_version',
+    name: 'Runtime Version',
+    description: 'Node.js or Python version',
+    emoji: '⚙️',
+    defaultColor: '32',
+    varName: 'runtime_out',
+    supportsAutoColor: false,
+    modes: [
+      { value: 'node', label: 'Node.js', hint: 'v20.11.0' },
+      { value: 'python', label: 'Python', hint: 'py3.12' },
+      { value: 'auto', label: 'Auto-detect', hint: 'detects from project files' },
+    ],
+    defaultMode: 'auto',
+    exampleValues: { node: 'v20.11.0', python: 'py3.12', auto: 'v20.11.0' },
+    exampleValue: 'v20.11.0',
+    generateBash(cfg) {
+      const mode = cfg.mode || 'auto';
+      if (mode === 'node') {
+        return `_node_ver=$(node -v 2>/dev/null)
+if [ -n "$_node_ver" ]; then
+  runtime_out=${c(`${lbl(cfg)}$_node_ver`, cfg.color)}
+fi`;
+      }
+      if (mode === 'python') {
+        return `_py_ver=$(python3 --version 2>/dev/null | awk '{print "py"$2}' | cut -d. -f1,2)
+if [ -n "$_py_ver" ]; then
+  runtime_out=${c(`${lbl(cfg)}$_py_ver`, cfg.color)}
+fi`;
+      }
+      // auto-detect
+      return `if [ -f "$cwd/package.json" ] || [ -f "$cwd/node_modules/.package-lock.json" ]; then
+  _node_ver=$(node -v 2>/dev/null)
+  if [ -n "$_node_ver" ]; then
+    runtime_out=${c(`${lbl(cfg)}$_node_ver`, cfg.color)}
+  fi
+elif [ -f "$cwd/requirements.txt" ] || [ -f "$cwd/pyproject.toml" ] || [ -f "$cwd/setup.py" ]; then
+  _py_ver=$(python3 --version 2>/dev/null | awk '{print "py"$2}' | cut -d. -f1,2)
+  if [ -n "$_py_ver" ]; then
+    runtime_out=${c(`${lbl(cfg)}$_py_ver`, cfg.color)}
+  fi
+fi`;
+    },
+  },
 ];
 
 export default items;
